@@ -60,7 +60,8 @@ public class VideoLocalDataSource implements VideoDataSource{
         String[] mediaColumns = { MediaStore.Video.Media._ID,
                 MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE,
                 MediaStore.Video.Media.MIME_TYPE,
-                MediaStore.Video.Media.DISPLAY_NAME };
+                MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.DURATION };
 
         Cursor cursor = mContext.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 mediaColumns, null, null, null);
@@ -78,22 +79,21 @@ public class VideoLocalDataSource implements VideoDataSource{
                         MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
                         thumbColumns, MediaStore.Video.Thumbnails.VIDEO_ID
                                 + "=" + id, null, null);
-//                if (thumbCursor.moveToFirst()) {
-//                    info.setThumbPath(thumbCursor.getString(thumbCursor
-//                            .getColumnIndex(MediaStore.Video.Thumbnails.DATA)));
-//                }
+                if (thumbCursor.moveToFirst()) {
+                    video.setThumbPath(thumbCursor.getString(thumbCursor
+                            .getColumnIndex(MediaStore.Video.Thumbnails.DATA)));
+                }
                 video.setPath(cursor.getString(cursor
                         .getColumnIndexOrThrow(MediaStore.Video.Media.DATA)));
-//                info.setTitle(cursor.getString(cursor
-//                        .getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)));
-
+                video.setTitle(cursor.getString(cursor
+                        .getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)));
                 video.setName(cursor.getString(cursor
                         .getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)));
-//                LogUtil.log(TAG, "DisplayName:"+info.getDisplayName());
-//                info.setMimeType(cursor
-//                        .getString(cursor
-//                                .getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)));
-
+                video.setMimeType(cursor
+                        .getString(cursor
+                                .getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)));
+                video.setDuration(cursor.getLong(cursor
+                        .getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)));
                 list.add(video);
             } while (cursor.moveToNext());
         }

@@ -2,10 +2,10 @@ package com.lz69.androidvideoplayer.playlist;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +27,11 @@ import com.lz69.androidvideoplayer.data.Video;
 import com.lz69.androidvideoplayer.data.source.VideoRepository;
 import com.lz69.androidvideoplayer.data.source.local.VideoLocalDataSource;
 import com.lz69.androidvideoplayer.data.source.remote.VideoRemoteDataSource;
+import com.lz69.androidvideoplayer.utils.TimeUtils;
+import com.lz69.androidvideoplayer.videoplayer.VideoPlayerActivity;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.List;
 
 public class PlayListActivity extends BaseActivity implements PlayListContract.View{
@@ -180,9 +185,12 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             Video video = videos.get(position);
             holder.tvName.setText(video.getName());
+            Log.i(TAG, video.getThumbPath());
+            Picasso.with(mContext).load(new File(video.getThumbPath())).resize(80 * 3, 80 * 3).centerCrop().into(holder.ivThumb);
+            holder.tvDuration.setText(TimeUtils.getHMS(video.getDuration()));
         }
 
         @Override
@@ -194,10 +202,28 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
 
             public TextView tvName;
 
+            public ImageView ivThumb;
+
+            public TextView tvDuration;
+
             public ViewHolder(View itemView) {
                 super(itemView);
                 tvName = (TextView) itemView.findViewById(R.id.tvName);
+                ivThumb = (ImageView) itemView.findViewById(R.id.ivThumb);
+                tvDuration = (TextView) itemView.findViewById(R.id.tvDuration);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+//                        Toast.makeText(mContext, "哈啊哈" + getLayoutPosition(), Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(mContext, VideoPlayerActivity.class);
+                        intent.putExtra(VideoPlayerActivity.PLAY_VIDEO, videos.get(getLayoutPosition()));
+                        startActivity(intent);
+                    }
+                });
+                itemView.setBackgroundResource(R.drawable.recycler_bg);
             }
         }
+
+
     }
 }
