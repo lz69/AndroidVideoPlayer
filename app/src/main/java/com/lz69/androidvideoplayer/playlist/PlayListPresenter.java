@@ -31,15 +31,18 @@ public class PlayListPresenter implements PlayListContract.Presenter {
     }
 
     private void loadVideos() {
+        mPlayListView.showRefresh();
         mVideoRepository.loadVideos(new VideoDataSource.LoadVideosCallback() {
             @Override
             public void onVideosLoaded(List<Video> videos) {
                 mPlayListView.showPlayList(videos);
+                mPlayListView.hideRefresh();
             }
 
             @Override
             public void onDataNotAvailable(String tip) {
                 mPlayListView.showNoDataNotAvailable(tip);
+                mPlayListView.hideRefresh();
             }
         });
     }

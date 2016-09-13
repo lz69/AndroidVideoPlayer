@@ -5,17 +5,11 @@
     android:background="#0099cc"
     tools:context="com.lz69.androidvideoplayer.videoplayer.VideoPlayerActivity">
 
-<!--    <VideoView
-        android:id="@+id/vvVideoPlayer"
+    <com.lz69.androidvideoplayer.videoplayer.VideoPlayerSurfaceView
+        android:id="@+id/videoPlayerSurfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:keepScreenOn="true"/>-->
-
-    <SurfaceView
-        android:id="@+id/svVideoPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_gravity="center"/>
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->

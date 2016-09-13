@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -16,8 +17,10 @@ import android.view.View;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -34,11 +37,9 @@ import java.io.IOException;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class VideoPlayerActivity extends BaseActivity implements BaseView {
+public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
-    private SurfaceView svVideoPlayer;
-
-    private MediaPlayer mediaPlayer;
+    private VideoPlayerSurfaceView videoPlayerSurfaceView;
 
     private Video currentVideo;
 
@@ -71,7 +72,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView {
             // Note that some of these constants are new as of API 16 (Jelly Bean)
             // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
-            svVideoPlayer.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+            videoPlayerSurfaceView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -118,46 +119,26 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_player);
-        mediaPlayer = new MediaPlayer();
-        mVisible = false;
+        initDatas();
         initViews();
         setListeners();
+        videoPlayerSurfaceView.addVideo(currentVideo);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(videoPlayerSurfaceView != null)
+            videoPlayerSurfaceView.setVideoLayout(0,0);
+    }
+
+    private void initDatas() {
+        mVisible = false;
         currentVideo = getIntent().getParcelableExtra(PLAY_VIDEO);
-
-//        if(file.exists()) {
-//            vvVideoPlayer.setVideoPath(file.getAbsolutePath());
-//            vvVideoPlayer.setMediaController(vedioController);
-//            vedioController.setMediaPlayer(vvVideoPlayer);
-//            vvVideoPlayer.requestFocus();
-//            vvVideoPlayer.start();
-//        }
-        start();
-    }
-
-    private void start(){
-        File file = new File(currentVideo.getPath());
-        svVideoPlayer.getHolder().setKeepScreenOn(true);
-        svVideoPlayer.getHolder().addCallback(new SurfaceViewCallback());
-    }
-
-    private void play() {
-        try {
-            mediaPlayer.reset();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setDataSource(currentVideo.getPath());
-            mediaPlayer.setDisplay(svVideoPlayer.getHolder());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void release() {
-        if (mediaPlayer != null ) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
+        videoPlayerSurfaceView.release();
     }
 
     @Override
@@ -166,36 +147,19 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView {
         release();
     }
 
-    private class SurfaceViewCallback implements SurfaceHolder.Callback {
-
-        @Override
-        public void surfaceCreated(SurfaceHolder surfaceHolder) {
-            play();
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
-        }
-    }
 
     private void initViews() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        svVideoPlayer = (SurfaceView) findViewById(R.id.svVideoPlayer);
+        videoPlayerSurfaceView = (VideoPlayerSurfaceView) findViewById(R.id.videoPlayerSurfaceView);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
     }
 
     private void setListeners() {
         // Set up the user interaction to manually show or hide the system UI.
-        svVideoPlayer.setOnClickListener(new View.OnClickListener() {
+        videoPlayerSurfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
@@ -253,7 +217,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView {
     @SuppressLint("InlinedApi")
     private void show() {
         // Show the system bar
-        svVideoPlayer.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        videoPlayerSurfaceView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mVisible = true;
 
@@ -274,5 +238,17 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView {
     @Override
     public void setPresenter(Object presenter) {
 
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        videoPlayerSurfaceView.play();
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        videoPlayerSurfaceView.pause();
     }
 }

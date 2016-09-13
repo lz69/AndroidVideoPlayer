@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -12,8 +14,12 @@ import android.widget.Toast;
 
 import com.lz69.androidvideoplayer.data.Video;
 import com.lz69.androidvideoplayer.data.source.VideoDataSource;
+import com.lz69.androidvideoplayer.utils.MD5Utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,13 +41,6 @@ public class VideoLocalDataSource implements VideoDataSource{
 
     @Override
     public void loadVideos(LoadVideosCallback loadVideosCallback) {
-//        List<Video> videos = new ArrayList<>();
-//        for(int i = 0; i < 10; i++) {
-//            Video video = new Video();
-//            video.setId(i);
-//            video.setName("测试" + i);
-//            videos.add(video);
-//        }
         List<Video> videos = null;// 视频信息集合
         videos = new ArrayList<>();
         getVideoFile(videos, Environment.getExternalStorageDirectory());
@@ -75,14 +74,16 @@ public class VideoLocalDataSource implements VideoDataSource{
                 Video video = new Video();
                 int id = cursor.getInt(cursor
                         .getColumnIndex(MediaStore.Video.Media._ID));
-                Cursor thumbCursor =  mContext.getContentResolver().query(
-                        MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
-                        thumbColumns, MediaStore.Video.Thumbnails.VIDEO_ID
-                                + "=" + id, null, null);
-                if (thumbCursor.moveToFirst()) {
-                    video.setThumbPath(thumbCursor.getString(thumbCursor
-                            .getColumnIndex(MediaStore.Video.Thumbnails.DATA)));
-                }
+//                Cursor thumbCursor =  mContext.getContentResolver().query(
+//                        MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+//                        thumbColumns, MediaStore.Video.Thumbnails.VIDEO_ID
+//                                + "=" + id, null, null);
+//                if (thumbCursor.moveToFirst()) {
+//                    video.setThumbPath(thumbCursor.getString(thumbCursor
+//                            .getColumnIndex(MediaStore.Video.Thumbnails.DATA)));
+//                }
+                video.setId(id);
+
                 video.setPath(cursor.getString(cursor
                         .getColumnIndexOrThrow(MediaStore.Video.Media.DATA)));
                 video.setTitle(cursor.getString(cursor
@@ -94,8 +95,55 @@ public class VideoLocalDataSource implements VideoDataSource{
                                 .getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)));
                 video.setDuration(cursor.getLong(cursor
                         .getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)));
+
+                //生称缩略图
+                video.setThumbPath(getVideoThumbnail(video.getPath()));
                 list.add(video);
             } while (cursor.moveToNext());
         }
+    }
+
+    private String getVideoThumbnail(String filePath) {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(filePath);
+            bitmap = retriever.getFrameAtTime();
+        }
+        catch(IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                retriever.release();
+            }
+            catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+        }
+        return saveBitmap(bitmap, filePath);
+    }
+
+    public String saveBitmap(Bitmap bm, String picName) {
+        File f = new File(mContext.getCacheDir(), MD5Utils.getMD5(picName));
+        if (f.exists()) {
+            f.delete();
+        }
+        try {
+            FileOutputStream out = new FileOutputStream(f);
+            bm.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return f.getAbsolutePath();
     }
 }

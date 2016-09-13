@@ -16,6 +16,10 @@ public interface PlayListContract {
         void showNoDataNotAvailable(String tip);
 
         void showPlayList(List<Video> videos);
+
+        void showRefresh();
+
+        void hideRefresh();
     }
 
     interface Presenter extends BasePresenter {

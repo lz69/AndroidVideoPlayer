@@ -7,9 +7,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,13 +36,15 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.List;
 
-public class PlayListActivity extends BaseActivity implements PlayListContract.View{
+public class PlayListActivity extends BaseActivity implements PlayListContract.View, SwipeRefreshLayout.OnRefreshListener {
 
     private RecyclerView rvPlayList;
 
     private PlayListContract.Presenter mPresenter;
 
     private PlayListAdapter mPlayListAdapter;
+
+    private SwipeRefreshLayout srlRefresh;
 
     private final String TAG = "lz69";
 
@@ -53,7 +57,17 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
         initViews();
         mPresenter = new PlayListPresenter(VideoRepository.getInstance(VideoLocalDataSource.getInstance(this),
                 VideoRemoteDataSource.getInstance(this)), this);
-        requestSomePermissin();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                requestSomePermissin();
+            }
+        }, 1000);
     }
 
     private void requestSomePermissin() {
@@ -113,6 +127,9 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
 
     private void initViews() {
         rvPlayList = (RecyclerView) findViewById(R.id.rvPlayList);
+        srlRefresh = (SwipeRefreshLayout) findViewById(R.id.srlRefresh);
+        srlRefresh.setOnRefreshListener(this);
+
         rvPlayList.setLayoutManager(new LinearLayoutManager(this));
         rvPlayList.setItemAnimator(new DefaultItemAnimator());
         //设置固定大小
@@ -136,6 +153,22 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
         mPlayListAdapter = new PlayListAdapter(this, videos);
         // 为mRecyclerView设置适配器
         rvPlayList.setAdapter(mPlayListAdapter);
+        srlRefresh.setRefreshing(false);
+    }
+
+    @Override
+    public void showRefresh() {
+        srlRefresh.setRefreshing(true);
+    }
+
+    @Override
+    public void hideRefresh() {
+        srlRefresh.setRefreshing(false);
+    }
+
+    @Override
+    public void onRefresh() {
+        requestSomePermissin();
     }
 
     class ItemDivider extends RecyclerView.ItemDecoration {
@@ -188,8 +221,8 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
         public void onBindViewHolder(final ViewHolder holder, int position) {
             Video video = videos.get(position);
             holder.tvName.setText(video.getName());
-            Log.i(TAG, video.getThumbPath());
-            Picasso.with(mContext).load(new File(video.getThumbPath())).resize(80 * 3, 80 * 3).centerCrop().into(holder.ivThumb);
+            if(video.getThumbPath() != null)
+                Picasso.with(mContext).load(new File(video.getThumbPath())).resize(80 * 3, 80 * 3).centerCrop().into(holder.ivThumb);
             holder.tvDuration.setText(TimeUtils.getHMS(video.getDuration()));
         }
 
@@ -214,7 +247,6 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-//                        Toast.makeText(mContext, "哈啊哈" + getLayoutPosition(), Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(mContext, VideoPlayerActivity.class);
                         intent.putExtra(VideoPlayerActivity.PLAY_VIDEO, videos.get(getLayoutPosition()));
                         startActivity(intent);
@@ -223,7 +255,5 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
                 itemView.setBackgroundResource(R.drawable.recycler_bg);
             }
         }
-
-
     }
 }
