@@ -14,5 +14,5 @@ public interface VideoDataSource {
 
     }
 
-    void loadVideos(LoadVideosCallback loadVideosCallback);
+    void getVideos(LoadVideosCallback loadVideosCallback);
 }

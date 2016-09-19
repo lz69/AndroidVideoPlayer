@@ -23,6 +23,8 @@ public class VideoRepository implements VideoDataSource{
 
     VideoRemoteDataSource mVideoRemoteDataSource;
 
+    private Boolean isCacheDirty = false;
+
     private VideoRepository(VideoLocalDataSource videoLocalDataSource,
                             VideoRemoteDataSource videoRemoteDataSource) {
         mVideoLocalDataSource = videoLocalDataSource;
@@ -37,14 +39,14 @@ public class VideoRepository implements VideoDataSource{
     }
 
     @Override
-    public void loadVideos(final LoadVideosCallback loadVideosCallback) {
+    public void getVideos(final LoadVideosCallback loadVideosCallback) {
         //如果内存中有数据
-        if (mCachedVideos != null) {
+        if (mCachedVideos != null && !isCacheDirty) {
             loadVideosCallback.onVideosLoaded(new ArrayList<Video>(mCachedVideos.values()));
             return;
         }
         //加载本地数据
-        mVideoLocalDataSource.loadVideos(new LoadVideosCallback() {
+        mVideoLocalDataSource.getVideos(new LoadVideosCallback() {
             @Override
             public void onVideosLoaded(List<Video> videos) {
                 refreshCache(videos);
@@ -66,6 +68,10 @@ public class VideoRepository implements VideoDataSource{
         for (Video video : videos) {
             mCachedVideos.put(video.getId(), video);
         }
+        isCacheDirty = false;
     }
 
+    public void refreshVideos() {
+        isCacheDirty = true;
+    }
 }

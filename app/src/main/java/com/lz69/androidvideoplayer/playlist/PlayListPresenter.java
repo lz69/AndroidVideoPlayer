@@ -27,12 +27,16 @@ public class PlayListPresenter implements PlayListContract.Presenter {
 
     @Override
     public void start() {
-        loadVideos();
+        loadVideos(true);
     }
 
-    private void loadVideos() {
+    private void loadVideos(boolean forceUpdate) {
         mPlayListView.showRefresh();
-        mVideoRepository.loadVideos(new VideoDataSource.LoadVideosCallback() {
+
+        if (forceUpdate) {
+            mVideoRepository.refreshVideos();
+        }
+        mVideoRepository.getVideos(new VideoDataSource.LoadVideosCallback() {
             @Override
             public void onVideosLoaded(List<Video> videos) {
                 mPlayListView.showPlayList(videos);

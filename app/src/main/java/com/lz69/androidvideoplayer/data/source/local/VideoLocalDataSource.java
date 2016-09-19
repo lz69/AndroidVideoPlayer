@@ -40,15 +40,13 @@ public class VideoLocalDataSource implements VideoDataSource{
     }
 
     @Override
-    public void loadVideos(LoadVideosCallback loadVideosCallback) {
-        List<Video> videos = null;// 视频信息集合
-        videos = new ArrayList<>();
-        getVideoFile(videos, Environment.getExternalStorageDirectory());
-        loadVideosCallback.onVideosLoaded(videos);
+    public void getVideos(final LoadVideosCallback loadVideosCallback) {
+        getVideoFile(loadVideosCallback, Environment.getExternalStorageDirectory());
     }
 
-    private void getVideoFile(final List<Video> list, File file) {// 获得视频文件
+    private void getVideoFile(LoadVideosCallback loadVideosCallback, File file) {// 获得视频文件
 
+        List<Video> list = new ArrayList<>();
         // MediaStore.Video.Thumbnails.DATA:视频缩略图的文件路径
         String[] thumbColumns = { MediaStore.Video.Thumbnails.DATA,
                 MediaStore.Video.Thumbnails.VIDEO_ID };
@@ -101,6 +99,7 @@ public class VideoLocalDataSource implements VideoDataSource{
                 list.add(video);
             } while (cursor.moveToNext());
         }
+        loadVideosCallback.onVideosLoaded(list);
     }
 
     private String getVideoThumbnail(String filePath) {

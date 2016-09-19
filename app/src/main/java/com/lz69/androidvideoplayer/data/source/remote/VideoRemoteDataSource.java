@@ -24,7 +24,7 @@ public class VideoRemoteDataSource implements VideoDataSource {
     }
 
     @Override
-    public void loadVideos(LoadVideosCallback loadVideosCallback) {
+    public void getVideos(LoadVideosCallback loadVideosCallback) {
 
     }
 }
