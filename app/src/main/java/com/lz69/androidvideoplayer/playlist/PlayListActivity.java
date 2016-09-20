@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -57,17 +58,12 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
         initViews();
         mPresenter = new PlayListPresenter(VideoRepository.getInstance(VideoLocalDataSource.getInstance(this),
                 VideoRemoteDataSource.getInstance(this)), this);
+        requestSomePermissin();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                requestSomePermissin();
-            }
-        }, 1000);
     }
 
     private void requestSomePermissin() {
@@ -149,12 +145,24 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
 
     @Override
     public void showPlayList(List<Video> videos) {
-        // 初始化自定义的适配器
-        mPlayListAdapter = new PlayListAdapter(this, videos);
-        // 为mRecyclerView设置适配器
-        rvPlayList.setAdapter(mPlayListAdapter);
-        srlRefresh.setRefreshing(false);
+        Message msg = new Message();
+        msg.obj = videos;
+        handler.sendMessage(msg);
     }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            List<Video> videos = (List<Video>) msg.obj;
+            // 初始化自定义的适配器
+            mPlayListAdapter = new PlayListAdapter(PlayListActivity.this, videos);
+            // 为mRecyclerView设置适配器
+            rvPlayList.setAdapter(mPlayListAdapter);
+            srlRefresh.setRefreshing(false);
+            hideRefresh();
+        }
+    };
 
     @Override
     public void showRefresh() {
@@ -168,7 +176,7 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
 
     @Override
     public void onRefresh() {
-        requestSomePermissin();
+        mPresenter.getVideos(false);
     }
 
     class ItemDivider extends RecyclerView.ItemDecoration {

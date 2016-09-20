@@ -1,6 +1,8 @@
 package com.lz69.androidvideoplayer.playlist;
 
 
+import android.os.Handler;
+
 import com.lz69.androidvideoplayer.data.Video;
 import com.lz69.androidvideoplayer.data.source.VideoDataSource;
 import com.lz69.androidvideoplayer.data.source.VideoRepository;
@@ -27,27 +29,31 @@ public class PlayListPresenter implements PlayListContract.Presenter {
 
     @Override
     public void start() {
-        loadVideos(true);
+        getVideos(true);
     }
 
-    private void loadVideos(boolean forceUpdate) {
+    @Override
+    public void getVideos(final Boolean forceUpdate) {
         mPlayListView.showRefresh();
 
-        if (forceUpdate) {
-            mVideoRepository.refreshVideos();
-        }
-        mVideoRepository.getVideos(new VideoDataSource.LoadVideosCallback() {
+        new Thread(new Runnable() {
             @Override
-            public void onVideosLoaded(List<Video> videos) {
-                mPlayListView.showPlayList(videos);
-                mPlayListView.hideRefresh();
-            }
+            public void run() {
+                if (forceUpdate) {
+                    mVideoRepository.refreshVideos();
+                }
+                mVideoRepository.getVideos(new VideoDataSource.LoadVideosCallback() {
+                    @Override
+                    public void onVideosLoaded(List<Video> videos) {
+                        mPlayListView.showPlayList(videos);
+                    }
 
-            @Override
-            public void onDataNotAvailable(String tip) {
-                mPlayListView.showNoDataNotAvailable(tip);
-                mPlayListView.hideRefresh();
+                    @Override
+                    public void onDataNotAvailable(String tip) {
+                        mPlayListView.showNoDataNotAvailable(tip);
+                    }
+                });
             }
-        });
+        }).start();
     }
 }

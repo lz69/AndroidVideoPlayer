@@ -20,9 +20,10 @@ public interface PlayListContract {
         void showRefresh();
 
         void hideRefresh();
+
     }
 
     interface Presenter extends BasePresenter {
-
+        void getVideos(final Boolean forceUpdate);
     }
 }

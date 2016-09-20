@@ -2,36 +2,21 @@ package com.lz69.androidvideoplayer.videoplayer;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.provider.MediaStore;
+import android.os.Message;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.MediaController;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.VideoView;
+import android.widget.SeekBar;
 
 import com.lz69.androidvideoplayer.R;
 import com.lz69.androidvideoplayer.base.BaseActivity;
 import com.lz69.androidvideoplayer.base.BaseView;
 import com.lz69.androidvideoplayer.data.Video;
-import com.lz69.androidvideoplayer.jni.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -45,6 +30,9 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
     public static String PLAY_VIDEO = "play_video";
 
+    private SeekBar sbProgress;
+
+    private Timer progressTimer;
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -84,11 +72,6 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
             mControlsView.setVisibility(View.VISIBLE);
         }
     };
@@ -122,6 +105,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
         initDatas();
         initViews();
         setListeners();
+        initProgressTimer();
         videoPlayerSurfaceView.addVideo(currentVideo);
     }
 
@@ -139,6 +123,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
     private void release() {
         videoPlayerSurfaceView.release();
+        progressTimer.cancel();
     }
 
     @Override
@@ -149,13 +134,30 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
 
     private void initViews() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
         videoPlayerSurfaceView = (VideoPlayerSurfaceView) findViewById(R.id.videoPlayerSurfaceView);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
+        sbProgress = (SeekBar) findViewById(R.id.sbProgress);
     }
+
+    private void initProgressTimer() {
+        progressTimer = new Timer();
+        progressTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Message msg = new Message();
+                msg.arg1 = videoPlayerSurfaceView.getProgress();
+                handler.sendMessage(msg);
+            }
+        }, 0, 100);
+    }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            sbProgress.setProgress(msg.arg1);
+        }
+    };
 
     private void setListeners() {
         // Set up the user interaction to manually show or hide the system UI.
@@ -168,7 +170,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+//        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
 
     @Override
@@ -181,17 +183,6 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
         delayedHide(100);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // This ID represents the Home or Up button.
-            NavUtils.navigateUpFromSameTask(this);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void toggle() {
         if (mVisible) {
             hide();
@@ -201,11 +192,6 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
     }
 
     private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
         mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
@@ -237,7 +223,6 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
     @Override
     public void setPresenter(Object presenter) {
-
     }
 
     @Override

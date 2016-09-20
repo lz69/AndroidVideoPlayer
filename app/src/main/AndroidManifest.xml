@@ -32,7 +32,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_video_player"
             android:parentActivityName=".base.BaseActivity"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lz69.androidvideoplayer.base.BaseActivity" />

@@ -7,6 +7,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
@@ -143,5 +144,18 @@ public class VideoPlayerSurfaceView extends SurfaceView implements SurfaceHolder
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
         }
+    }
+
+    public int getProgress() {
+        try {
+            if (mMediaPlayer != null) {
+                int currentPositon = mMediaPlayer.getCurrentPosition();
+                int duration = mMediaPlayer.getDuration();
+                return (currentPositon  * 100 / duration);
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

@@ -72,14 +72,6 @@ public class VideoLocalDataSource implements VideoDataSource{
                 Video video = new Video();
                 int id = cursor.getInt(cursor
                         .getColumnIndex(MediaStore.Video.Media._ID));
-//                Cursor thumbCursor =  mContext.getContentResolver().query(
-//                        MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
-//                        thumbColumns, MediaStore.Video.Thumbnails.VIDEO_ID
-//                                + "=" + id, null, null);
-//                if (thumbCursor.moveToFirst()) {
-//                    video.setThumbPath(thumbCursor.getString(thumbCursor
-//                            .getColumnIndex(MediaStore.Video.Thumbnails.DATA)));
-//                }
                 video.setId(id);
 
                 video.setPath(cursor.getString(cursor
@@ -93,7 +85,6 @@ public class VideoLocalDataSource implements VideoDataSource{
                                 .getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)));
                 video.setDuration(cursor.getLong(cursor
                         .getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)));
-
                 //生称缩略图
                 video.setThumbPath(getVideoThumbnail(video.getPath()));
                 list.add(video);
@@ -103,6 +94,10 @@ public class VideoLocalDataSource implements VideoDataSource{
     }
 
     private String getVideoThumbnail(String filePath) {
+        File f = new File(mContext.getCacheDir(), MD5Utils.getMD5(filePath));
+        if (f.exists()) {
+            return f.getAbsolutePath();
+        }
         Bitmap bitmap = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
