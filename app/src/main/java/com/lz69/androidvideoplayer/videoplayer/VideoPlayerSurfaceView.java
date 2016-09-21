@@ -33,7 +33,7 @@ public class VideoPlayerSurfaceView extends SurfaceView implements SurfaceHolder
 
     private Activity mActivty;
 
-    private float mVideoAspectRatio = 16/9;
+    private float mVideoAspectRatio;
 
     public VideoPlayerSurfaceView(Context context) {
         super(context);
@@ -101,26 +101,33 @@ public class VideoPlayerSurfaceView extends SurfaceView implements SurfaceHolder
         mVideoWidth = mMediaPlayer.getVideoWidth();
         mVideoHeight = mMediaPlayer.getVideoHeight();
 
+        //计算视频宽高比
+        mVideoAspectRatio = mVideoWidth / (float) mVideoHeight;
+
         ViewGroup.LayoutParams lp = getLayoutParams();
         DisplayMetrics disp = getContext().getResources().getDisplayMetrics();
         //获取窗口的宽度，高度个，宽高比
         int windowWidth = disp.widthPixels;
         int windowHeight = disp.heightPixels;
-        float windowRatio = windowWidth / (float) windowHeight;
-
-        //获取视频的宽高比
-        mVideoAspectRatio = mVideoWidth / (float) mVideoHeight;
-
-        //设置变化后视频的宽高比
-        float videoRatio = aspectRatio <= 0.01f ? mVideoAspectRatio : aspectRatio;
-
-        //如果当前是横屏
-        if(mActivty.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            mSurfaceViewHeight = windowWidth;
-            mSurfaceViewWidth = (int)(mSurfaceViewHeight * videoRatio);
+        //如果视屏的宽度小于高度
+        if (mVideoWidth < mVideoHeight) {
+            //如果当前是横屏
+            if (windowWidth > windowHeight) {
+                mSurfaceViewHeight = mVideoWidth;
+                mSurfaceViewWidth = (int) (mSurfaceViewHeight * mVideoAspectRatio);
+            } else {
+                mSurfaceViewHeight = mVideoHeight;
+                mSurfaceViewWidth = mVideoWidth;
+            }
         } else {
-            mSurfaceViewHeight = windowHeight;
-            mSurfaceViewWidth = windowWidth;
+            //如果当前是竖屏
+            if (windowWidth < windowHeight) {
+                mSurfaceViewWidth = windowWidth;
+                mSurfaceViewHeight = (int) (mSurfaceViewWidth / mVideoAspectRatio);;
+            } else {
+                mSurfaceViewHeight = mVideoHeight;
+                mSurfaceViewWidth = mVideoWidth;
+            }
         }
         lp.width = mSurfaceViewWidth;
         lp.height = mSurfaceViewHeight;
