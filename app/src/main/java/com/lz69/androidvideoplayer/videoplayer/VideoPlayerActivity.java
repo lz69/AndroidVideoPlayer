@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
 import com.lz69.androidvideoplayer.R;
@@ -33,6 +34,9 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
     private SeekBar sbProgress;
 
     private Timer progressTimer;
+
+    private FrameLayout flContent;
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -137,6 +141,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
         videoPlayerSurfaceView = (VideoPlayerSurfaceView) findViewById(R.id.videoPlayerSurfaceView);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         sbProgress = (SeekBar) findViewById(R.id.sbProgress);
+        flContent = (FrameLayout) findViewById(R.id.flContent);
     }
 
     private void initProgressTimer() {
@@ -160,17 +165,18 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
     };
 
     private void setListeners() {
-        // Set up the user interaction to manually show or hide the system UI.
-        videoPlayerSurfaceView.setOnClickListener(new View.OnClickListener() {
+        flContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
             }
         });
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-//        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        videoPlayerSurfaceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                videoPlayerSurfaceView.pause();
+            }
+        });
     }
 
     @Override
@@ -190,6 +196,7 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
             show();
         }
     }
+
 
     private void hide() {
         mControlsView.setVisibility(View.GONE);
