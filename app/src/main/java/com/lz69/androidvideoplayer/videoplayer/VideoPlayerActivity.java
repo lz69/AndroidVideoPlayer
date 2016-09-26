@@ -171,12 +171,12 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
                 toggle();
             }
         });
-        videoPlayerSurfaceView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                videoPlayerSurfaceView.pause();
-            }
-        });
+//        videoPlayerSurfaceView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                videoPlayerSurfaceView.pause();
+//            }
+//        });
     }
 
     @Override
