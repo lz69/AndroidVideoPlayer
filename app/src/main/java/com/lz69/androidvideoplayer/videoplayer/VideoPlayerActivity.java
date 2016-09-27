@@ -72,11 +72,13 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
+    private View mControlsViewTop;
+    private View mControlsViewBottom;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
-            mControlsView.setVisibility(View.VISIBLE);
+            mControlsViewTop.setVisibility(View.VISIBLE);
+            mControlsViewBottom.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -139,7 +141,8 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
     private void initViews() {
         videoPlayerSurfaceView = (VideoPlayerSurfaceView) findViewById(R.id.videoPlayerSurfaceView);
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        mControlsViewTop = findViewById(R.id.fullscreen_content_controls_top);
+        mControlsViewBottom = findViewById(R.id.fullscreen_content_controls_bottom);
         sbProgress = (SeekBar) findViewById(R.id.sbProgress);
         flContent = (FrameLayout) findViewById(R.id.flContent);
     }
@@ -199,7 +202,8 @@ public class VideoPlayerActivity extends BaseActivity implements BaseView{
 
 
     private void hide() {
-        mControlsView.setVisibility(View.GONE);
+        mControlsViewTop.setVisibility(View.GONE);
+        mControlsViewBottom.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay

@@ -19,10 +19,10 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
+        <RelativeLayout
+            android:id="@+id/fullscreen_content_controls_top"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_gravity="top|center_horizontal"
             android:background="@color/black_overlay"
             android:visibility="gone"
@@ -30,25 +30,47 @@
             tools:ignore="UselessParent">
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/tvCurrentPlayTime"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:textColor="#ffffff"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
                 android:text="播放时间"/>
+
+            <TextView
+                android:id="@+id/tvSurplusPlayTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:text="剩余时间"/>
 
             <SeekBar
                 android:id="@+id/sbProgress"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="10"/>
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tvCurrentPlayTime"
+                android:layout_toLeftOf="@id/tvSurplusPlayTime"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/fullscreen_content_controls_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/black_overlay"
+            android:layout_gravity="bottom|center_horizontal">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_centerInParent="true"
                 android:textColor="#ffffff"
-                android:text="剩余时间"/>
-        </LinearLayout>
+                android:text="播放"/>
+        </RelativeLayout>
     </FrameLayout>
 
 </FrameLayout>
