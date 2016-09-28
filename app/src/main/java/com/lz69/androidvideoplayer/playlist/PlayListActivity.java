@@ -30,6 +30,7 @@ import com.lz69.androidvideoplayer.data.Video;
 import com.lz69.androidvideoplayer.data.source.VideoRepository;
 import com.lz69.androidvideoplayer.data.source.local.VideoLocalDataSource;
 import com.lz69.androidvideoplayer.data.source.remote.VideoRemoteDataSource;
+import com.lz69.androidvideoplayer.imageloader.ImageLoader;
 import com.lz69.androidvideoplayer.utils.TimeUtils;
 import com.lz69.androidvideoplayer.videoplayer.VideoPlayerActivity;
 import com.squareup.picasso.Picasso;
@@ -230,7 +231,7 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
             Video video = videos.get(position);
             holder.tvName.setText(video.getName());
             if(video.getThumbPath() != null)
-                Picasso.with(mContext).load(new File(video.getThumbPath())).resize(80 * 3, 80 * 3).centerCrop().into(holder.ivThumb);
+                ImageLoader.getInstance(mContext).loadImageFromFile(video.getThumbPath(), holder.ivThumb, 80 * 3, 80 * 3);
             holder.tvDuration.setText(TimeUtils.getHMS(video.getDuration()));
         }
 
