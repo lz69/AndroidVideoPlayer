@@ -231,7 +231,7 @@ public class PlayListActivity extends BaseActivity implements PlayListContract.V
             Video video = videos.get(position);
             holder.tvName.setText(video.getName());
             if(video.getThumbPath() != null)
-                ImageLoader.getInstance(mContext).loadImageFromFile(video.getThumbPath(), holder.ivThumb, 80 * 3, 80 * 3);
+                ImageLoader.getInstance(mContext).loadImageFromFile(video.getThumbPath(), holder.ivThumb);
             holder.tvDuration.setText(TimeUtils.getHMS(video.getDuration()));
         }
 

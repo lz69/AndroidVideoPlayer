@@ -3,15 +3,13 @@ package com.lz69.androidvideoplayer.imageloader;
 import android.content.Context;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
-
-import java.io.File;
-
 public class ImageLoader {
 
     private static ImageLoader INSTANCE = null;
 
     private Context mContext = null;
+
+    private ImageLoaderAdapter mAdapter;
 
     public static synchronized ImageLoader getInstance(Context context) {
         if (INSTANCE == null)
@@ -22,12 +20,13 @@ public class ImageLoader {
     public ImageLoader(Context context) {
         if(mContext == null)
             this.mContext = context;
+        mAdapter = new PicassoImageLoaderAdapter(mContext);
     }
 
     private ImageLoader() {
     }
 
-    public void loadImageFromFile(String picPath, ImageView imageView, int bitmapWidth, int bitmapHeight) {
-        Picasso.with(mContext).load(new File(picPath)).centerCrop().resize(bitmapWidth, bitmapHeight).into(imageView);
+    public void loadImageFromFile(String picPath, ImageView imageView) {
+        mAdapter.loadImageFromFile(picPath, imageView);
     }
 }

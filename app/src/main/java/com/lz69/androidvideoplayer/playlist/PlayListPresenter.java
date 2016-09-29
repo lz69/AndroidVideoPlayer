@@ -11,6 +11,9 @@ import com.lz69.androidvideoplayer.data.source.remote.VideoRemoteDataSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by lz69 on 2016/9/5.
@@ -36,7 +39,15 @@ public class PlayListPresenter implements PlayListContract.Presenter {
     public void getVideos(final Boolean forceUpdate) {
         mPlayListView.showRefresh();
 
-        new Thread(new Runnable() {
+        ExecutorService exec = Executors.newCachedThreadPool(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable runnable) {
+                Thread t = new Thread(runnable);
+                t.setDaemon(true);
+                return t;
+            }
+        });
+        exec.execute(new Runnable() {
             @Override
             public void run() {
                 if (forceUpdate) {
@@ -54,6 +65,6 @@ public class PlayListPresenter implements PlayListContract.Presenter {
                     }
                 });
             }
-        }).start();
+        });
     }
 }
